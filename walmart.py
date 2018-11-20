@@ -1,11 +1,16 @@
 import requests
 import json
 import headers
+import time
 VERBOSE = False
 REQUEST_TIMEOUT = 10
 NETWORK_RETRY = 3
+PAUSE_BETWEEN_REQUESTS = 0
+# This is the short pause between consequetive network requests
 
-def network_request(url, headers, params=None, timeout=None, network_retry=None):
+TERRAFIRM_URL = "https://www.walmart.com/terra-firma/fetch"
+
+def network_request(url, headers, post=False, params=None, timeout=None, data=None, network_retry=None):
 	# This is the function that makes network requests
 	if network_retry == None:
 		# Sets params to default
@@ -14,11 +19,16 @@ def network_request(url, headers, params=None, timeout=None, network_retry=None)
 		# Sets params to default
 		timeout = REQUEST_TIMEOUT
 	for _ in range(network_retry):
-		res = requests.get(url, headers=headers, param=params, timeout=timeout)
+		if post:
+			res = requests.post(url, headers=headers, params=params, data=data, timeout=timeout)
+		else:
+			res = requests.get(url, headers=headers, params=params, data=data, timeout=timeout)
 		# Makes the network request
-		if res.status_code == 200:
-			# This means it was successful
-			return res
+		if res != None:
+			if res.status_code == 200:
+				# This means it was successful
+				return res
+		time.sleep(PAUSE_BETWEEN_REQUESTS)
 
 
 def returnPricing(terrafirmaDoc):
@@ -38,12 +48,10 @@ def local_item_info(store, sku):
 	# Returns all store-specific information for a SKU
 	header = headers.terrafirm(sku)
 	# Generates the header for this request
-	params = (
-	    ('rgs', 'OFFER_PRODUCT,OFFER_INVENTORY,OFFER_PRICE,VARIANT_SUMMARY'),
-	)
+	params = (('rgs', 'OFFER_PRODUCT,OFFER_INVENTORY,OFFER_PRICE,VARIANT_SUMMARY'),)
 	# Parameters that specify the data we want to return
 	data = '{{"itemId":"{}","paginationContext":{{"selected":false}},"storeFrontIds":[{{"usStoreId":{},"preferred":false,"semStore":false}}]}}'.format(sku, store)
-	response = requests.post('https://www.walmart.com/terra-firma/fetch', headers=header, params=params, data=data, timeout=10)
+	response = network_request(TERRAFIRM_URL, post=True, headers=header, params=params, data=data)
 	print response.status_code
 	if VERBOSE:
 		print json.dumps(response.json())
