@@ -1,3 +1,8 @@
+# encoding=utf8
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
+# Set default encoding to UTF-8
 import argparse
 import walmart
 import threading
@@ -116,11 +121,17 @@ if __name__ == '__main__':
 		# This allows you to kill the thread
 		try:
 			time.sleep(5)
-
-			lock.acquire()
-			# Gets lock to wait on active processes
-			update_csv(args['output'])
-			lock.release()
+			try:
+				lock.acquire()
+				# Gets lock to wait on active processes
+				update_csv(args['output'])
+				lock.release()
+			except Exception as exp:
+				print("CSV ERROR: {}".format(exp))
+				try:
+					lock.relase()
+				except:
+					pass
 		except:
 			print("Program Killed...")
 			lock.acquire()
