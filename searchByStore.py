@@ -3,6 +3,7 @@ import walmart
 import threading
 import csv
 import time
+import random
 from time import gmtime, strftime
 
 lock = threading.Lock()
@@ -14,20 +15,20 @@ ALL_SKUS = "MasterList.txt"
 # Default thread count
 SEARCH_VALS = []
 ALL_ITEMS = []
-CSV_HEADERS = [""]
+CSV_HEADERS = ["skuVal", "title", "price", "quantity", "store", "availability", "primaryProductId", "category", "longSku", "rollback", "productType", "storeName", "storeAddress", "storeCity", "strikethrough", "upc", "usItemId", "storePostalCode", "storeStateOrProvinceCode", "reducedPrice", "clearance", "wupc"]
 COMPLETED = []
+STATIC_VALS = []
 
 def get_current_time():
 	return strftime("%Y-%m-%d-%H-%M-%S", gmtime())
 
-def update_csv(fileName=None):
-	if fileName == None:
-		fileName = get_current_time()
-	lock.acquire()
+CSV_FILE = "{}.csv".format(get_current_time())
+
+def update_csv(fileName):
 	with open(fileName, "wb") as f:
+		toWrite = [CSV_HEADERS] + ALL_ITEMS
 		writer = csv.writer(f)
-		writer.writerows(ALL_ITEMS)
-	lock.release()
+		writer.writerows(toWrite)
 
 def search():
 	while len(SEARCH_VALS) > 0:
@@ -38,12 +39,19 @@ def search():
 			skuNumber = searchVal['sku']
 			storeNumber = searchVal['store']
 			val = walmart.local_item_info(storeNumber, skuNumber)
+			#print val
+			#print val.keys()
 			if val != None:
-				print "{}\n".format(val),
-			# Threading safe printing
-			#if val != None and val['Quantity'] != 'Out of stock' and val['isVal'] == True:
-			#	ALL_ITEMS.append(val)
-			#	print("{} | {} | {} | {} | {}/{}".format(x['title'][:40], val['price'], sku, len(ALL_ITEMS), START_LEN-len(SKUS), START_LEN))
+				if val['availability'] == "NOT_AVAILABLE" and STATIC_VALS[1] == True:
+					pass
+				else:
+					val['skuVal'] = skuNumber
+					if walmart.VERBOSE > 1:
+						print "{} | {} | {} | {} | {}/{}\n".format(val['title'][:40], val['price'], skuNumber, len(ALL_ITEMS), len(COMPLETED), STATIC_VALS[0]),
+					tVal = []
+					for key in CSV_HEADERS:
+						tVal.append(val[key])
+					ALL_ITEMS.append(tVal)
 		except Exception as exp:
 			if walmart.VERBOSE > 3:
 				print("ERROR: {}".format(exp))
@@ -58,11 +66,12 @@ def search():
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='')
-	parser.add_argument('-o','--output', help='Specify csv output', required=False, default=None)
+	parser.add_argument('-o','--output', help='Specify csv output', required=False, default=CSV_FILE)
 	parser.add_argument('-t','--threads', help='Specify thread count', required=False, default=THREADS)
 	parser.add_argument('-s','--store', help='Specify store to search', required=False, default=None)
 	parser.add_argument('-i','--input', help='Specify SKU list or single sku', required=False, default=ALL_SKUS)
 	parser.add_argument('-v','--verbose', help='Verbose Mode', required=False, default=False)
+	parser.add_argument('-a','--allstock', help='Show all items regardless of availability', required=False, default="False")
 	args = vars(parser.parse_args())
 	# Contains a dictionary of all arguments
 	if args['verbose'] != False:
@@ -95,6 +104,9 @@ if __name__ == '__main__':
 			SEARCH_VALS.append({"sku": sku, "store": store})
 			totalVals += 1
 			# Creates a list of all search terms
+	random.shuffle(SEARCH_VALS)
+	STATIC_VALS.append(totalVals)
+	STATIC_VALS.append((args['allstock'] != "False"))
 	thread_count = args['threads']
 	threads = [threading.Thread(target=search) for _ in range(thread_count)]
 	for thread in threads:
@@ -103,9 +115,16 @@ if __name__ == '__main__':
 	while len(COMPLETED) != totalVals:
 		# This allows you to kill the thread
 		try:
-			time.sleep(1)
-		except:
-			with lock:
-				# Gets lock to wait on active processes
-				raise Exception("Program Killed...")
+			time.sleep(5)
 
+			lock.acquire()
+			# Gets lock to wait on active processes
+			update_csv(args['output'])
+			lock.release()
+		except:
+			print("Program Killed...")
+			lock.acquire()
+			# Gets lock to wait on active processes
+			update_csv(args['output'])
+			lock.release()
+			raise Exception("Program Killed...")

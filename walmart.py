@@ -66,16 +66,16 @@ def returnPricing(terrafirmaDoc):
 			upc = productInfo['upc']
 			productType = productInfo['productType']
 			longSku = productInfo['productAttributes']['sku']
+			titleVal = productInfo['productAttributes']['productName']
 			category = productInfo['productAttributes']['productCategory']['categoryPath']
-			information = {"price: ": price, "rollback: ": rollback, "strikethrough: ": strikethrough, "reducedPrice: ": reducedPrice, "clearance: ": clearance, "store: ": store, "storeCity: ": storeCity, "storeName: ": storeName, "storeAddress: ": storeAddress, "storeStateOrProvinceCode: ": storeStateOrProvinceCode, "storePostalCode: ": storePostalCode, "availability: ": availability, "quantity: ": quantity, "primaryProductId: ": primaryProductId, "wupc: ": wupc, "usItemId: ": usItemId, "upc: ": upc, "productType: ": productType, "longSku: ": longSku, "category: ": category}
+			information = {"title": titleVal, "price": price, "rollback": rollback, "strikethrough": strikethrough, "reducedPrice": reducedPrice, "clearance": clearance, "store": store, "storeCity": storeCity, "storeName": storeName, "storeAddress": storeAddress, "storeStateOrProvinceCode": storeStateOrProvinceCode, "storePostalCode": storePostalCode, "availability": availability, "quantity": quantity, "primaryProductId": primaryProductId, "wupc": wupc, "usItemId": usItemId, "upc": upc, "productType": productType, "longSku": longSku, "category": category}
 			for key, val in information.items():
 				if "Hasher" in str(type(information[key])):
 					information[key] = ""
 			return information
 		except Exception as exp:
-			if VERBOSE > 1:
+			if VERBOSE > 5:
 				print exp
-			pass
 
 def local_item_info(store, sku):
 	# Returns all store-specific information for a SKU
@@ -117,4 +117,4 @@ def GrabAllStoreNumbers():
 
 if __name__ == '__main__':
 	VERBOSE = 3
-	print local_item_info('2265', '435188866')
+	print local_item_info('2265', 'adsfadsf435188866')
