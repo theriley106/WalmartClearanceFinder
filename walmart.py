@@ -1,6 +1,25 @@
 import requests
 import json
+import headers
 VERBOSE = False
+REQUEST_TIMEOUT = 10
+NETWORK_RETRY = 3
+
+def network_request(url, headers, params=None, timeout=None, network_retry=None):
+	# This is the function that makes network requests
+	if network_retry == None:
+		# Sets params to default
+		network_retry = NETWORK_RETRY
+	if timeout == None:
+		# Sets params to default
+		timeout = REQUEST_TIMEOUT
+	for _ in range(network_retry):
+		res = requests.get(url, headers=headers, param=params, timeout=timeout)
+		# Makes the network request
+		if res.status_code == 200:
+			# This means it was successful
+			return res
+
 
 def returnPricing(terrafirmaDoc):
 	# Extracts pricing information from the terrafirm API response
@@ -17,22 +36,15 @@ def returnPricing(terrafirmaDoc):
 
 def local_item_info(store, sku):
 	# Returns all store-specific information for a SKU
-	headers = {
-	    'pragma': 'no-cache',
-	    'content-type': 'application/json',
-	    'accept': '*/*',
-	    'cache-control': 'no-cache',
-	    'authority': 'www.walmart.com',
-	    'referer': 'https://www.walmart.com/product/{}/sellers'.format(sku),
-		}
-
+	header = headers.terrafirm(sku)
+	# Generates the header for this request
 	params = (
 	    ('rgs', 'OFFER_PRODUCT,OFFER_INVENTORY,OFFER_PRICE,VARIANT_SUMMARY'),
 	)
-
+	# Parameters that specify the data we want to return
 	data = '{{"itemId":"{}","paginationContext":{{"selected":false}},"storeFrontIds":[{{"usStoreId":{},"preferred":false,"semStore":false}}]}}'.format(sku, store)
-
-	response = requests.post('https://www.walmart.com/terra-firma/fetch', headers=headers, params=params, data=data, timeout=10)
+	response = requests.post('https://www.walmart.com/terra-firma/fetch', headers=header, params=params, data=data, timeout=10)
+	print response.status_code
 	if VERBOSE:
 		print json.dumps(response.json())
 	return returnPricing(response.json())
