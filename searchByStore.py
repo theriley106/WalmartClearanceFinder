@@ -2,6 +2,7 @@ import argparse
 import walmart
 import threading
 import csv
+import time
 
 lock = threading.Lock()
 
@@ -73,6 +74,14 @@ if __name__ == '__main__':
 	thread_count = args['threads']
 	threads = [threading.Thread(target=search) for _ in range(thread_count)]
 	for thread in threads:
+		thread.daemon = True
 		thread.start()
-	for threading in threads:
-		thread.join()
+	while True:
+		# This allows you to kill the thread
+		try:
+			time.sleep(1)
+		except:
+			with lock:
+				# Gets lock to wait on active processes
+				raise Exception("Program Killed...")
+
