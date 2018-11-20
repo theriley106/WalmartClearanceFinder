@@ -1,6 +1,7 @@
 import argparse
 import walmart
 import threading
+import csv
 
 lock = threading.Lock()
 
@@ -19,6 +20,8 @@ def search():
 			skuNumber = searchVal['sku']
 			storeNumber = searchVal['store']
 			val = walmart.local_item_info(storeNumber, skuNumber)
+			print "{}\n".format(val),
+			# Threading safe printing
 			if val != None and val['Quantity'] != 'Out of stock' and val['isVal'] == True:
 				ALL_ITEMS.append(val)
 				print("{} | {} | {} | {} | {}/{}".format(x['title'][:40], val['Price'], sku, len(ALL_ITEMS), START_LEN-len(SKUS), START_LEN))
@@ -40,11 +43,11 @@ if __name__ == '__main__':
 	args = vars(parser.parse_args())
 	# Contains a dictionary of all arguments
 	if args['verbose'] != False:
+		# Sets verbose setting
 		try:
 			walmart.VERBOSE = int(args['verbose'])
 		except:
 			walmart.VERBOSE = 5
-	# Sets verbose setting | Hacky way of making sure it's a boolean
 	if '.' not in args['input']:
 		# This means it's a single sku search
 		skuList = [args['input']]
