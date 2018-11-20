@@ -3,14 +3,31 @@ import walmart
 import threading
 import csv
 import time
+from time import gmtime, strftime
 
 lock = threading.Lock()
 
 THREADS = 30
+CSV_UPDATE_INTERVAL = 30
+# This is the frequency of CSV Updates
 ALL_SKUS = "MasterList.txt"
 # Default thread count
 SEARCH_VALS = []
 ALL_ITEMS = []
+CSV_HEADERS = [""]
+COMPLETED = []
+
+def get_current_time():
+	return strftime("%Y-%m-%d-%H-%M-%S", gmtime())
+
+def update_csv(fileName=None):
+	if fileName == None:
+		fileName = get_current_time()
+	lock.acquire()
+	with open(fileName, "wb") as f:
+		writer = csv.writer(f)
+		writer.writerows(ALL_ITEMS)
+	lock.release()
 
 def search():
 	while len(SEARCH_VALS) > 0:
@@ -21,11 +38,12 @@ def search():
 			skuNumber = searchVal['sku']
 			storeNumber = searchVal['store']
 			val = walmart.local_item_info(storeNumber, skuNumber)
-			print "{}\n".format(val),
+			if val != None:
+				print "{}\n".format(val),
 			# Threading safe printing
-			if val != None and val['Quantity'] != 'Out of stock' and val['isVal'] == True:
-				ALL_ITEMS.append(val)
-				print("{} | {} | {} | {} | {}/{}".format(x['title'][:40], val['Price'], sku, len(ALL_ITEMS), START_LEN-len(SKUS), START_LEN))
+			#if val != None and val['Quantity'] != 'Out of stock' and val['isVal'] == True:
+			#	ALL_ITEMS.append(val)
+			#	print("{} | {} | {} | {} | {}/{}".format(x['title'][:40], val['price'], sku, len(ALL_ITEMS), START_LEN-len(SKUS), START_LEN))
 		except Exception as exp:
 			if walmart.VERBOSE > 3:
 				print("ERROR: {}".format(exp))
@@ -33,6 +51,10 @@ def search():
 				lock.release()
 			except:
 				pass
+		try:
+			COMPLETED.append(searchVal)
+		except:
+			pass
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='')
@@ -65,18 +87,20 @@ if __name__ == '__main__':
 		# The user specified a single store
 		storeVals = [args['store']]
 		# Creates a list with a single item
+	totalVals = 0
 	for store in storeVals:
 		# Iterates through all inputted stores
 		for sku in skuList:
 			# Iterates through all inputted skus
 			SEARCH_VALS.append({"sku": sku, "store": store})
+			totalVals += 1
 			# Creates a list of all search terms
 	thread_count = args['threads']
 	threads = [threading.Thread(target=search) for _ in range(thread_count)]
 	for thread in threads:
 		thread.daemon = True
 		thread.start()
-	while True:
+	while len(COMPLETED) != totalVals:
 		# This allows you to kill the thread
 		try:
 			time.sleep(1)
