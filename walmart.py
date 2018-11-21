@@ -10,7 +10,7 @@ PAUSE_BETWEEN_REQUESTS = 0
 # This is the short pause between consequetive network requests
 
 TERRAFIRM_URL = "https://www.walmart.com/terra-firma/fetch"
-WALMART_SEARCH_URL = "https://www.walmart.com/search/api/preso?prg=mWeb&cat_id=0&facet=retailer%3AWalmart.com&query={0}&stores={1}"
+WALMART_SEARCH_URL = "https://www.walmart.com/search/api/preso?prg=mWeb&cat_id=0&facet=retailer%3AWalmart.com&query={0}"
 PRESCO_BASE = "https://www.walmart.com/search/api/preso?"
 
 # This is the url that allows you to search on walmart.com
@@ -83,10 +83,12 @@ def get_all_facets(url):
 
 
 
-def gen_search_urls(query, store):
+def gen_search_urls(query, store=None):
 	itemVals = []
 	urlVals = []
-	url = WALMART_SEARCH_URL.format(query, store)
+	url = WALMART_SEARCH_URL.format(query)
+	if store != None:
+		url += "&stores={}".format(store)
 	res = network_request(url).json()
 	total_results = res['requestContext']['itemCount']['total']
 	print("Total Results: {}".format(total_results))
