@@ -10,6 +10,10 @@ PAUSE_BETWEEN_REQUESTS = 0
 # This is the short pause between consequetive network requests
 
 TERRAFIRM_URL = "https://www.walmart.com/terra-firma/fetch"
+WALMART_SEARCH_URL = "https://www.walmart.com/search/api/preso?prg=mWeb&cat_id=0&facet=retailer%3AWalmart.com&query={0}&stores={1}"
+PRESCO_BASE = "https://www.walmart.com/search/api/preso?"
+
+# This is the url that allows you to search on walmart.com
 
 class Hasher(dict):
     # https://stackoverflow.com/a/3405143/190597
@@ -17,7 +21,10 @@ class Hasher(dict):
         value = self[key] = type(self)()
         return value
 
-def network_request(url, headers, post=False, params=None, timeout=None, data=None, network_retry=None):
+def gen_facet(start_price=0, end_price=5000):
+	facet = "&facet=retailer%3AWalmart.com%7C%7Cprice%3A{}%20-%20%24{}"
+
+def network_request(url, headers={}, post=False, params=None, timeout=None, data=None, network_retry=None):
 	# This is the function that makes network requests
 	if network_retry == None:
 		# Sets params to default
@@ -37,6 +44,57 @@ def network_request(url, headers, post=False, params=None, timeout=None, data=No
 				return res
 		time.sleep(PAUSE_BETWEEN_REQUESTS)
 		# Pause to prevent back to back requests
+
+
+
+def gen_all_pages(url, itemCount):
+	urls = []
+	for i in range((itemCount/20)+1):
+		urls.append("{}&page={}".format(url, i+1))
+	return urls
+
+def get_category_facets(url):
+	urls = []
+	res = network_request(url).json()
+	for val in res['facets']:
+		if val['type'] == 'cat_id':
+			for department in val['values']:
+				if department['itemCount'] > 1000:
+					for urlVal in department['values']:
+						for tempUrl in gen_all_pages(urlVal['url'], urlVal['itemCount']):
+							urls.append(PRESCO_BASE + tempUrl)
+				else:
+					for tempUrl in gen_all_pages(department['url'], department['itemCount']):
+						urls.append(PRESCO_BASE + tempUrl)
+	return urls
+
+def get_all_facets(url):
+	urls = []
+	res = network_request(url).json()
+	for val in res['facets']:
+		if val['type'] == 'price':
+			for priceRange in val['values']:
+				if priceRange['itemCount'] > 1000:
+					urls += get_category_facets(PRESCO_BASE + priceRange['url'])
+				else:
+					for tempUrl in gen_all_pages(priceRange['url'], priceRange['itemCount']):
+						urls.append(PRESCO_BASE + tempUrl)
+	return urls
+
+
+
+def gen_search_urls(query, store):
+	itemVals = []
+	urlVals = []
+	url = WALMART_SEARCH_URL.format(query, store)
+	res = network_request(url).json()
+	total_results = res['requestContext']['itemCount']['total']
+	print("Total Results: {}".format(total_results))
+	if total_results > 1000:
+		urlVals += get_all_facets(url)
+	else:
+		urlVals += gen_all_pages(url, total_results)
+	return urlVals
 
 
 def returnPricing(terrafirmaDoc):
