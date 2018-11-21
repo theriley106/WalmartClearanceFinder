@@ -6,7 +6,7 @@ lock = threading.Lock()
 
 STARTTIME = time.time()
 
-THREADS = 15
+THREADS = 30
 RESULTS = []
 URL_VALS = []
 COMPLETED = []
@@ -19,17 +19,19 @@ def search():
 	while len(URL_VALS) > 0:
 		try:
 			lock.acquire()
-			url = URL_VALS.pop(0)
-			lock.release()
-			info = walmart.network_request(url).json()
-			for val in info['items']:
-				lock.acquire()
-				if val['usItemId'] not in COMPLETED:
-					COMPLETED.append(val['usItemId'])
-					RESULTS.append(val)
+			if len(URL_VALS) > 0:
+				url = URL_VALS.pop(0)
 				lock.release()
-			print "{} items found\n".format(len(COMPLETED)),
-
+				info = walmart.network_request(url).json()
+				for val in info['items']:
+					lock.acquire()
+					if val['usItemId'] not in COMPLETED:
+						COMPLETED.append(val['usItemId'])
+						RESULTS.append(val)
+						print("{} | Item #{}".format(val['usItemId'], len(COMPLETED)))
+					lock.release()
+			else:
+				lock.release()
 		except Exception as exp:
 			print exp
 
@@ -44,4 +46,4 @@ if __name__ == '__main__':
 		thread.start()
 	for thread in threads:
 		thread.join()
-	print(time.time() - STARTTIME)
+	print("{} items found in {} seconds".format(len(COMPLETED), time.time() - STARTTIME))
