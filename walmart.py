@@ -144,7 +144,11 @@ def local_item_info(store, sku):
 	params = (('rgs', 'OFFER_PRODUCT,OFFER_INVENTORY,OFFER_PRICE,VARIANT_SUMMARY'),)
 	# Parameters that specify the data we want to return
 	data = '{{"itemId":"{}","paginationContext":{{"selected":false}},"storeFrontIds":[{{"usStoreId":{},"preferred":false,"semStore":false}}]}}'.format(sku, store)
+
+        print 'headers:', headers, 'params:', params, 'data:', data 
+
 	response = network_request(TERRAFIRM_URL, post=True, headers=header, params=params, data=data)
+        print(response.json())
 	# This calls the API endpoint
 	if VERBOSE > 3:
 		# This will print the api response for debugging

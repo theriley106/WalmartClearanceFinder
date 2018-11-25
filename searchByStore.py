@@ -44,8 +44,6 @@ def search():
 			skuNumber = searchVal['sku']
 			storeNumber = searchVal['store']
 			val = walmart.local_item_info(storeNumber, skuNumber)
-			#print val
-			#print val.keys()
 			if val != None:
 				if val['availability'] == "NOT_AVAILABLE" and STATIC_VALS[1] == True:
 					pass
@@ -93,6 +91,7 @@ if __name__ == '__main__':
 		# This means it's a file input
 		skuList = [x for x in open(args['input']).read().split("\n") if len(x) > 0]
 		# Creates a list from the file input
+        print('starting store number grab')
 	if args['store'] == None:
 		# This means the user did not specify a store number
 		storeVals = walmart.GrabAllStoreNumbers()
@@ -101,7 +100,9 @@ if __name__ == '__main__':
 		# The user specified a single store
 		storeVals = [args['store']]
 		# Creates a list with a single item
+        print('done with store number grab')
 	totalVals = 0
+        print('creating sku list')
 	for store in storeVals:
 		# Iterates through all inputted stores
 		for sku in skuList:
@@ -109,6 +110,7 @@ if __name__ == '__main__':
 			SEARCH_VALS.append({"sku": sku, "store": store})
 			totalVals += 1
 			# Creates a list of all search terms
+        print('done creating sku list')
 	random.shuffle(SEARCH_VALS)
 	STATIC_VALS.append(totalVals)
 	STATIC_VALS.append((args['allstock'] != "False"))
