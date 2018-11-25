@@ -1,49 +1,29 @@
-import json
-import requests
+import queue
+import store
 
-HEADERS = json.load(open("headers.json"))
-TERRAFIRM_URL = "https://www.walmart.com/terra-firma/fetch"
+class SKUQueue:
+    def __init__(self, skuListLoc):
+        self._skuQueue = queue.Queue()
+        with open(skuListLoc) as f:
+            for line in f:
+                self._skuQueue.put(line[:-1])
 
-class Store:
-    def __init__(self, storeID):
-        self.storeID = storeID
+    def pop(self):
+        return self._skuQueue.get()
 
-    def searchWalmartID(self, wid):
-        headers = HEADERS['terrafirm']
-        headers['referer'] = "https://www.walmart.com/product/{}/sellers".format(wid)
+    def empty(self):
+        return self._skuQueue.empty()
 
-        params = (('rgs', 'OFFER_PRODUCT,OFFER_INVENTORY,OFFER_PRICE,VARIANT_SUMMARY'),)
-        data = '{{"itemId":"{}","paginationContext":{{"selected":false}},"storeFrontIds":[{{"usStoreId":{},"preferred":false,"semStore":false}}]}}'.format(wid, self.storeID)
-        res = requests.post(TERRAFIRM_URL, headers=headers, params=params, data=data)
-        terrafirmaDoc = res.json()
-        for key, value in terrafirmaDoc['payload']['offers'].items():
-            k = terrafirmaDoc['payload']['offers'][key]
-            if 'fulfillment' not in k:
+if __name__ == '__main__':
+    q = SKUQueue('./MasterList1.txt')
+    storeIDs = store.Store.getAllStoreNumbers()
+    storeList = [ store.Store(sid) for sid in storeIDs ]
+    while not q.empty():
+        item = q.pop()
+        for store in storeList:
+            item = store.searchWalmartID(item)
+            if item.format() == None:
                 continue
-            if not k['fulfillment']['pickupable']:
-                continue
-            price = value['pricesInfo']['priceMap']['CURRENT']['price']
-            store = value['fulfillment']['pickupOptions'][0]['storeId']
-            quantity = value['fulfillment']['pickupOptions'][0]["inStoreStockStatus"]
-            rollback = value['pricesInfo']['priceDisplayCodes']['rollback']
-            strikethrough = value['pricesInfo']['priceDisplayCodes']['strikethrough']
-            reducedPrice = value['pricesInfo']['priceDisplayCodes']['reducedPrice']
-            clearance = value['pricesInfo']['priceDisplayCodes']['clearance']
-            storeCity = value['fulfillment']['pickupOptions'][0]['storeCity']
-            storeName = value['fulfillment']['pickupOptions'][0]['storeName']
-            storeAddress = value['fulfillment']['pickupOptions'][0]['storeAddress']
-            storeStateOrProvinceCode = value['fulfillment']['pickupOptions'][0]['storeStateOrProvinceCode']
-            storePostalCode = value['fulfillment']['pickupOptions'][0]['storePostalCode']
-            availability = value['fulfillment']['pickupOptions'][0]['availability']
-            productInfo = terrafirmaDoc['payload']['products']
-            productInfo = productInfo[list(productInfo.keys())[0]]
-            primaryProductId = productInfo['primaryProductId']
-            wupc = productInfo['wupc']
-            usItemId = productInfo['usItemId']
-            upc = productInfo['upc']
-            productType = productInfo['productType']
-            longSku = productInfo['productAttributes']['sku']
-            titleVal = productInfo['productAttributes']['productName']
-            category = productInfo['productAttributes']['productCategory']['categoryPath']
-            information = {"title": titleVal, "price": price, "rollback": rollback, "strikethrough": strikethrough, "reducedPrice": reducedPrice, "clearance": clearance, "store": store, "storeCity": storeCity, "storeName": storeName, "storeAddress": storeAddress, "storeStateOrProvinceCode": storeStateOrProvinceCode, "storePostalCode": storePostalCode, "availability": availability, "quantity": quantity, "primaryProductId": primaryProductId, "wupc": wupc, "usItemId": usItemId, "upc": upc, "productType": productType, "longSku": longSku, "category": category}
-            return information
+            item.insert()
+            i = item.format()
+            print(i['usItemId'], i['store'], i['price'])
