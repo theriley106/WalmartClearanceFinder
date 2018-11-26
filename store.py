@@ -74,7 +74,6 @@ class Store:
     @staticmethod
     def getAllStoreNumbers():
         print('Short circuit store numbers')
-        return [3222, 4445, 396]
         def isSupercenter(name):
             return 'Walmart Supercenter' in name
         walmartFile = open('Walmarts.csv')

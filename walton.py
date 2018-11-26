@@ -1,3 +1,5 @@
+import sys
+import argparse
 import store
 import time
 import queue
@@ -31,15 +33,24 @@ CREATE TABLE IF NOT EXISTS skus(
     title TEXT,
     category TEXT,
     price MONEY,
+    store_city TEXT,
+    store_name TEXT,
     PRIMARY KEY(id, store_id)
 );''')
     conn.commit()
     cur.close()
 
+def createTable():
+    cur = conn.cursor()
+    cur.execute('DROP TABLE skus')
+    conn.commit()
+    cur.close()
+    
+
 def insert(item):
     try:
         cur = conn.cursor()
-        cur.execute('INSERT INTO skus VALUES(%s, %s, %s, %s, %s, %s)', (item['usItemId'], item['store'], item['quantity'], item['name'], item['category'], item['price']))
+        cur.execute('INSERT INTO skus VALUES(%s, %s, %s, %s, %s, %s, %s, %s)', (item['usItemId'], item['store'], item['quantity'], item['name'], item['category'], item['price'], item['storeCity'], item['storeName']))
         conn.commit()
         cur.close()
     except:
@@ -55,17 +66,27 @@ def searchAndInsert(args):
         return None
     i = item.format()
     itemID, store, price = i['usItemId'], i['store'], i['price']
-    print(itemID, store, price)
     insert(i)
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='')
+    parser.add_argument('-t','--threads', help='Specify thread count', required=False, default=60)
+    parser.add_argument('-s','--store', nargs='+', help='Store IDs', required=True, default=[])
+    parser.add_argument('--drop', action='store_true', help='Drop Database for new data', required=False)
+    args = vars(parser.parse_args())
+
+    if args['drop']:
+        dropTable()
+        sys.exit()
+
     createTable()
     q = SKUQueue('./MasterList.txt')
-    storeIDs = store.Store.getAllStoreNumbers()
+    storeIDs = args['store']
+    sys.exit()
     storeList = [ store.Store(sid) for sid in storeIDs ]
 
     productStoreList = itertools.product(storeList, q)
     total = len(productStoreList)
-    with ThreadPool(60) as p:
+    with ThreadPool(args['threads']) as p:
         p.map(searchAndInsert, productStoreList)
     conn.close()
