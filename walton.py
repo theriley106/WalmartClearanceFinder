@@ -74,8 +74,10 @@ if __name__ == '__main__':
     parser.add_argument('-s','--store', nargs='+', help='Store IDs', required=True, default=[])
     parser.add_argument('--drop', action='store_true', help='Drop Database for new data', required=False)
     args = vars(parser.parse_args())
+
+    threadCount = int(args['threads'])
     
-    print('Using %d threads' % args['threads'])
+    print('Using %d threads' % threadCount)
 
     # if args['drop']:
     #     dropTable()
@@ -89,6 +91,6 @@ if __name__ == '__main__':
 
     productStoreList = itertools.product(storeList, q)
     total = len(productStoreList)
-    with ThreadPool(args['threads']) as p:
+    with ThreadPool(threadCount) as p:
         p.map(searchAndInsert, productStoreList)
     conn.close()
