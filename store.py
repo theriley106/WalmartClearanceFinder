@@ -34,36 +34,36 @@ class Item:
                 self.longSku = productInfo['productAttributes']['sku']
                 self.name = productInfo['productAttributes']['productName']
                 self.category = productInfo['productAttributes']['productCategory']['categoryPath']
-                self.hasItem = True
                 return
             except:
-                self.hasItem = False
+                pass
 
     def format(self):
-        if not self.hasItem:
+        try:
+            return {
+                "name":                         self.name,
+                "price":                        self.price,
+                "rollback":                     self.rollback,
+                "strikethrough":                self.strikethrough,
+                "reducedPrice":                 self.reducedPrice,
+                "clearance":                    self.clearance,
+                "store":                        self.store,
+                "storeCity":                    self.storeCity,
+                "storeName":                    self.storeName,
+                "storeAddress":                 self.storeAddress,
+                "storeStateOrProvinceCode":     self.storeStateOrProvinceCode,
+                "storePostalCode":              self.storePostalCode,
+                "availability":                 self.availability,
+                "quantity":                     self.quantity,
+                "primaryProductId":             self.primaryProductId,
+                "usItemId":                     self.usItemId,
+                "upc":                          self.upc,
+                "productType":                  self.productType,
+                "longSku":                      self.longSku,
+                "category":                     self.category
+            }
+        except:
             return None
-        return {
-            "name":                         self.name,
-            "price":                        self.price,
-            "rollback":                     self.rollback,
-            "strikethrough":                self.strikethrough,
-            "reducedPrice":                 self.reducedPrice,
-            "clearance":                    self.clearance,
-            "store":                        self.store,
-            "storeCity":                    self.storeCity,
-            "storeName":                    self.storeName,
-            "storeAddress":                 self.storeAddress,
-            "storeStateOrProvinceCode":     self.storeStateOrProvinceCode,
-            "storePostalCode":              self.storePostalCode,
-            "availability":                 self.availability,
-            "quantity":                     self.quantity,
-            "primaryProductId":             self.primaryProductId,
-            "usItemId":                     self.usItemId,
-            "upc":                          self.upc,
-            "productType":                  self.productType,
-            "longSku":                      self.longSku,
-            "category":                     self.category
-        }
 
 class Store:
     def __init__(self, storeID):
