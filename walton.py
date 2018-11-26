@@ -1,29 +1,61 @@
-import queue
 import store
+import time
+import queue
+import itertools
+from multiprocessing import Pool
+import psycopg2
 
-class SKUQueue:
+conn = psycopg2.connect("dbname=wolfofwalmart user=postgres host=192.168.1.120 password=password123!!!")
+
+class SKUQueue(): 
     def __init__(self, skuListLoc):
         self._skuQueue = queue.Queue()
         with open(skuListLoc) as f:
             for line in f:
                 self._skuQueue.put(line[:-1])
 
-    def pop(self):
-        return self._skuQueue.get()
+    def __iter__(self):
+        while not self._skuQueue.empty():
+            yield self._skuQueue.get()
 
-    def empty(self):
-        return self._skuQueue.empty()
+def createTable():
+    cur = conn.cursor()
+    cur.execute('''
+CREATE TABLE IF NOT EXISTS skus(
+    id TEXT,
+    store_id INTEGER,
+    quantity TEXT,
+    title TEXT,
+    category TEXT,
+    price MONEY
+);''')
+    conn.commit()
+    cur.close()
+
+def insert(item):
+    cur = conn.cursor()
+    cur.execute('INSERT INTO skus VALUES(%s, %s, %s, %s, %s, %s)', (item['usItemId'], item['store'], item['quantity'], item['name'], item['category'], item['price']))
+    conn.commit()
+    cur.close()
+
+def searchAndInsert(args):
+    store, itemID = args
+    item = store.searchWalmartID(itemID)
+    if item.format() == None:
+        return None
+    i = item.format()
+    itemID, store, price = i['usItemId'], i['store'], i['price']
+    print(itemID, store, price)
+    insert(i)
 
 if __name__ == '__main__':
-    q = SKUQueue('./MasterList1.txt')
+    createTable()
+    q = SKUQueue('./MasterList.txt')
+    print(q._skuQueue.qsize())
     storeIDs = store.Store.getAllStoreNumbers()
     storeList = [ store.Store(sid) for sid in storeIDs ]
-    while not q.empty():
-        item = q.pop()
-        for store in storeList:
-            item = store.searchWalmartID(item)
-            if item.format() == None:
-                continue
-            item.insert()
-            i = item.format()
-            print(i['usItemId'], i['store'], i['price'])
+
+    productStoreList = itertools.product(storeList, q)
+    with Pool(60) as p:
+        p.map(searchAndInsert, productStoreList)
+    conn.close()

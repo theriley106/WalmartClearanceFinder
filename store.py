@@ -9,43 +9,41 @@ class Item:
     def __init__(self, itemJSON):
         terrafirmaDoc = itemJSON
         for key, value in terrafirmaDoc['payload']['offers'].items():
-            k = terrafirmaDoc['payload']['offers'][key]
-            if 'fulfillment' not in k:
-                continue
-            if not k['fulfillment']['pickupable']:
-                continue
-            self.price = value['pricesInfo']['priceMap']['CURRENT']['price']
-            self.store = value['fulfillment']['pickupOptions'][0]['storeId']
-            self.quantity = value['fulfillment']['pickupOptions'][0]["inStoreStockStatus"]
-            self.rollback = value['pricesInfo']['priceDisplayCodes']['rollback']
-            self.strikethrough = value['pricesInfo']['priceDisplayCodes']['strikethrough']
-            self.reducedPrice = value['pricesInfo']['priceDisplayCodes']['reducedPrice']
-            self.clearance = value['pricesInfo']['priceDisplayCodes']['clearance']
-            self.storeCity = value['fulfillment']['pickupOptions'][0]['storeCity']
-            self.storeName = value['fulfillment']['pickupOptions'][0]['storeName']
-            self.storeAddress = value['fulfillment']['pickupOptions'][0]['storeAddress']
-            self.storeStateOrProvinceCode = value['fulfillment']['pickupOptions'][0]['storeStateOrProvinceCode']
-            self.storePostalCode = value['fulfillment']['pickupOptions'][0]['storePostalCode']
-            self.availability = value['fulfillment']['pickupOptions'][0]['availability']
+            try:
+                k = terrafirmaDoc['payload']['offers'][key]
+                self.price = value['pricesInfo']['priceMap']['CURRENT']['price']
+                self.store = value['fulfillment']['pickupOptions'][0]['storeId']
+                self.quantity = value['fulfillment']['pickupOptions'][0]["inStoreStockStatus"]
+                self.rollback = value['pricesInfo']['priceDisplayCodes']['rollback']
+                self.strikethrough = value['pricesInfo']['priceDisplayCodes']['strikethrough']
+                self.reducedPrice = value['pricesInfo']['priceDisplayCodes']['reducedPrice']
+                self.clearance = value['pricesInfo']['priceDisplayCodes']['clearance']
+                self.storeCity = value['fulfillment']['pickupOptions'][0]['storeCity']
+                self.storeName = value['fulfillment']['pickupOptions'][0]['storeName']
+                self.storeAddress = value['fulfillment']['pickupOptions'][0]['storeAddress']
+                self.storeStateOrProvinceCode = value['fulfillment']['pickupOptions'][0]['storeStateOrProvinceCode']
+                self.storePostalCode = value['fulfillment']['pickupOptions'][0]['storePostalCode']
+                self.availability = value['fulfillment']['pickupOptions'][0]['availability']
 
-            productInfo = terrafirmaDoc['payload']['products']
-            productInfo = productInfo[list(productInfo.keys())[0]]
-            self.primaryProductId = productInfo['primaryProductId']
-            self.usItemId = productInfo['usItemId']
-            self.upc = productInfo['upc']
-            self.productType = productInfo['productType']
-            self.longSku = productInfo['productAttributes']['sku']
-            self.titleVal = productInfo['productAttributes']['productName']
-            self.category = productInfo['productAttributes']['productCategory']['categoryPath']
-            self.hasItem = True
-            return
-        self.hasItem = False
+                productInfo = terrafirmaDoc['payload']['products']
+                productInfo = productInfo[list(productInfo.keys())[0]]
+                self.primaryProductId = productInfo['primaryProductId']
+                self.usItemId = productInfo['usItemId']
+                self.upc = productInfo['upc']
+                self.productType = productInfo['productType']
+                self.longSku = productInfo['productAttributes']['sku']
+                self.name = productInfo['productAttributes']['productName']
+                self.category = productInfo['productAttributes']['productCategory']['categoryPath']
+                self.hasItem = True
+                return
+            except:
+                self.hasItem = False
 
     def format(self):
         if not self.hasItem:
             return None
         return {
-            "title":                        self.titleVal,
+            "name":                         self.name,
             "price":                        self.price,
             "rollback":                     self.rollback,
             "strikethrough":                self.strikethrough,
@@ -66,8 +64,6 @@ class Item:
             "longSku":                      self.longSku,
             "category":                     self.category
         }
-    def insert(self):
-        pass
 
 class Store:
     def __init__(self, storeID):
@@ -75,6 +71,7 @@ class Store:
 
     @staticmethod
     def getAllStoreNumbers():
+        print('Short circuit store numbers')
         return [1123]
         def isSupercenter(name):
             return 'Walmart Supercenter' in name
