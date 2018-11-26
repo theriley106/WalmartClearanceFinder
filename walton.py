@@ -75,9 +75,9 @@ if __name__ == '__main__':
     parser.add_argument('--drop', action='store_true', help='Drop Database for new data', required=False)
     args = vars(parser.parse_args())
 
-    if args['drop']:
-        dropTable()
-        sys.exit()
+    # if args['drop']:
+    #     dropTable()
+    #     sys.exit()
 
     createTable()
     q = SKUQueue('./MasterList.txt')
