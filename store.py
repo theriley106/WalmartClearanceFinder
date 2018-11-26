@@ -7,6 +7,8 @@ TERRAFIRM_URL = "https://www.walmart.com/terra-firma/fetch"
 
 class Item:
     def __init__(self, itemJSON):
+        if itemJSON == None:
+            return
         terrafirmaDoc = itemJSON
         for key, value in terrafirmaDoc['payload']['offers'].items():
             try:
@@ -88,4 +90,7 @@ class Store:
         params = (('rgs', 'OFFER_PRODUCT,OFFER_INVENTORY,OFFER_PRICE,VARIANT_SUMMARY'),)
         data = '{{"itemId":"{}","paginationContext":{{"selected":false}},"storeFrontIds":[{{"usStoreId":{},"preferred":false,"semStore":false}}]}}'.format(wid, self._storeID)
         res = requests.post(TERRAFIRM_URL, headers=headers, params=params, data=data)
-        return Item(res.json())
+        try:
+            return Item(res.json())
+        except:
+            return Item(None)
