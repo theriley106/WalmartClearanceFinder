@@ -2,8 +2,11 @@ import store
 import time
 import queue
 import itertools
-from multiprocessing import Pool
+from multiprocessing.pool import ThreadPool
 import psycopg2
+
+total = 0
+count = 0
 
 conn = psycopg2.connect("dbname=wolfofwalmart user=postgres host=192.168.1.120 password=password123!!!")
 
@@ -39,6 +42,9 @@ def insert(item):
     cur.close()
 
 def searchAndInsert(args):
+    global count
+    count += 1
+    print('%s/%s' % (count, total))
     store, itemID = args
     item = store.searchWalmartID(itemID)
     if item.format() == None:
@@ -51,11 +57,11 @@ def searchAndInsert(args):
 if __name__ == '__main__':
     createTable()
     q = SKUQueue('./MasterList.txt')
-    print(q._skuQueue.qsize())
+    total = q._skuQueue.qsize()
     storeIDs = store.Store.getAllStoreNumbers()
     storeList = [ store.Store(sid) for sid in storeIDs ]
 
     productStoreList = itertools.product(storeList, q)
-    with Pool(60) as p:
+    with ThreadPool(60) as p:
         p.map(searchAndInsert, productStoreList)
     conn.close()
