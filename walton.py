@@ -25,21 +25,25 @@ def createTable():
     cur = conn.cursor()
     cur.execute('''
 CREATE TABLE IF NOT EXISTS skus(
-    id TEXT,
+    id INTEGER,
     store_id INTEGER,
     quantity TEXT,
     title TEXT,
     category TEXT,
-    price MONEY
+    price MONEY,
+    PRIMARY KEY(id, store_id)
 );''')
     conn.commit()
     cur.close()
 
 def insert(item):
-    cur = conn.cursor()
-    cur.execute('INSERT INTO skus VALUES(%s, %s, %s, %s, %s, %s)', (item['usItemId'], item['store'], item['quantity'], item['name'], item['category'], item['price']))
-    conn.commit()
-    cur.close()
+    try:
+        cur = conn.cursor()
+        cur.execute('INSERT INTO skus VALUES(%s, %s, %s, %s, %s, %s)', (item['usItemId'], item['store'], item['quantity'], item['name'], item['category'], item['price']))
+        conn.commit()
+        cur.close()
+    except:
+        pass
 
 def searchAndInsert(args):
     global count
