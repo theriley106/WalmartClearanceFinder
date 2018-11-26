@@ -89,8 +89,8 @@ if __name__ == '__main__':
     storeIDs = args['store']
     storeList = [ store.Store(sid) for sid in storeIDs ]
 
+    total = len(storeList) * q._skuQueue.qsize()
     productStoreList = itertools.product(storeList, q)
-    total = len(productStoreList)
     with ThreadPool(threadCount) as p:
         p.map(searchAndInsert, productStoreList)
     conn.close()
