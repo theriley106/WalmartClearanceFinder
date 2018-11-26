@@ -74,15 +74,17 @@ if __name__ == '__main__':
     parser.add_argument('-s','--store', nargs='+', help='Store IDs', required=True, default=[])
     parser.add_argument('--drop', action='store_true', help='Drop Database for new data', required=False)
     args = vars(parser.parse_args())
+    
+    print('Using %d threads' % args['threads'])
 
     # if args['drop']:
     #     dropTable()
     #     sys.exit()
 
     createTable()
+    print('Created table')
     q = SKUQueue('./MasterList.txt')
     storeIDs = args['store']
-    sys.exit()
     storeList = [ store.Store(sid) for sid in storeIDs ]
 
     productStoreList = itertools.product(storeList, q)
