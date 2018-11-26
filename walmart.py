@@ -6,7 +6,7 @@ import csv
 VERBOSE = 0
 REQUEST_TIMEOUT = 10
 NETWORK_RETRY = 3
-PAUSE_BETWEEN_REQUESTS = 0
+PAUSE_BETWEEN_REQUESTS = 2
 # This is the short pause between consequetive network requests
 
 TERRAFIRM_URL = "https://www.walmart.com/terra-firma/fetch"
