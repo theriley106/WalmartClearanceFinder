@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS skus(
     conn.commit()
     cur.close()
 
-def createTable():
+def dropTable():
     cur = conn.cursor()
     cur.execute('DROP TABLE skus')
     conn.commit()
