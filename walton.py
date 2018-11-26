@@ -61,11 +61,11 @@ def searchAndInsert(args):
 if __name__ == '__main__':
     createTable()
     q = SKUQueue('./MasterList.txt')
-    total = q._skuQueue.qsize()
     storeIDs = store.Store.getAllStoreNumbers()
     storeList = [ store.Store(sid) for sid in storeIDs ]
 
     productStoreList = itertools.product(storeList, q)
+    total = len(productStoreList)
     with ThreadPool(60) as p:
         p.map(searchAndInsert, productStoreList)
     conn.close()
