@@ -12,7 +12,6 @@ PAUSE_BETWEEN_REQUESTS = 2
 TERRAFIRM_URL = "https://www.walmart.com/terra-firma/fetch"
 WALMART_SEARCH_URL = "https://www.walmart.com/search/api/preso?prg=mWeb&cat_id=0&facet=retailer%3AWalmart.com&query={0}"
 PRESCO_BASE = "https://www.walmart.com/search/api/preso?"
-
 # This is the url that allows you to search on walmart.com
 
 class Hasher(dict):
