@@ -17,11 +17,11 @@ $ pip install -r requirements.txt
 
 -o determines the destination of the csv file
 
--a determines if it should only find items in stock (Seting -a 1 for in stock only, leave default for everything)
+-a determines if it should only find items in stock (Setting -a 1 for in stock only, leave default for everything)
 
 -t determines how many threads to use
 
--i determines the skus to search (leave deafult for all, takes text files and strings as inputs)
+-i determines the skus to search (leave default for all, takes text files and strings as inputs)
 
 -s determines which store to search (Leave default for all)
 
