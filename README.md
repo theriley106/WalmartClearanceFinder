@@ -1,5 +1,9 @@
 # WolfOfWalmart
-Analyzing Walmart Store Inventory
+Tool to find unmarked clearance items at Walmart
+
+## What does this do?
+
+This program uses a series of private API endpoints on Walmart.com to find unmarked clearance items at walmart stores across the United States.
 
 ## Installing Dependencies
 
