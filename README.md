@@ -1,5 +1,5 @@
 # WolfOfWalmart
-Large scale Walmart inventory analytics
+Analyzing Walmart Store Inventory
 
 ## Installing Dependencies
 
