@@ -1,6 +1,5 @@
 import requests
 import json
-import headers
 import time
 import csv
 VERBOSE = 0
@@ -8,6 +7,8 @@ REQUEST_TIMEOUT = 10
 NETWORK_RETRY = 3
 PAUSE_BETWEEN_REQUESTS = 2
 # This is the short pause between consequetive network requests
+
+HEADER_TEMPLATE = json.load(open("headers.json"))
 
 TERRAFIRM_URL = "https://www.walmart.com/terra-firma/fetch"
 WALMART_SEARCH_URL = "https://www.walmart.com/search/api/preso?prg=mWeb&cat_id=0&facet=retailer%3AWalmart.com&query={0}"
@@ -18,6 +19,13 @@ class Hasher(dict):
     def __missing__(self, key):
         value = self[key] = type(self)()
         return value
+
+def gen_terrafirm_headers(sku):
+	# Headers for terrafirm request
+	# Requires item SKU
+	header = HEADER_TEMPLATE['terrafirm']
+	header['referer'] = "https://www.walmart.com/product/{}/sellers".format(sku)
+	return header
 
 def gen_facet(start_price=0, end_price=5000):
 	facet = "&facet=retailer%3AWalmart.com%7C%7Cprice%3A{}%20-%20%24{}"
@@ -135,7 +143,7 @@ def returnPricing(terrafirmaDoc):
 
 def local_item_info(store, sku):
 	# Returns all store-specific information for a SKU
-	header = headers.terrafirm(sku)
+	header = gen_terrafirm_headers(sku)
 	# Generates the header for this request
 	params = (('rgs', 'OFFER_PRODUCT,OFFER_INVENTORY,OFFER_PRICE,VARIANT_SUMMARY'),)
 	# Parameters that specify the data we want to return
