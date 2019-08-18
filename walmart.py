@@ -8,7 +8,7 @@ NETWORK_RETRY = 3
 PAUSE_BETWEEN_REQUESTS = 2
 # This is the short pause between consequetive network requests
 
-HEADER_TEMPLATE = json.load(open("headers.json"))
+HEADER_TEMPLATE = json.load(open("data/headers.json"))
 
 TERRAFIRM_URL = "https://www.walmart.com/terra-firma/fetch"
 WALMART_SEARCH_URL = "https://www.walmart.com/search/api/preso?prg=mWeb&cat_id=0&facet=retailer%3AWalmart.com&query={0}"
