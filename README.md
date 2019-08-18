@@ -1,4 +1,4 @@
-# WolfOfWalmart
+# WalmartClearanceFinder
 Tool to find unmarked clearance items at Walmart stores across the US.
 
 ## What does this do?
