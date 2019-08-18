@@ -15,7 +15,7 @@ lock = threading.Lock()
 THREADS = 30
 CSV_UPDATE_INTERVAL = 30
 # This is the frequency of CSV Updates
-ALL_SKUS = "MasterList.txt"
+ALL_SKUS = "data/MasterList.txt"
 # Default thread count
 SEARCH_VALS = []
 ALL_ITEMS = []
