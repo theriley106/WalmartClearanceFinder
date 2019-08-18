@@ -27,7 +27,7 @@ START_LEN = len(SKUS)
 
 def GrabAllStoreNumbers():
 	ListOfStores = []
-	with open('Walmarts.csv', 'r') as f:
+	with open('data/Walmarts.csv', 'r') as f:
 		reader = csv.reader(f)
 		your_list = list(reader)
 	for line in your_list:
