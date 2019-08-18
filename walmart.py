@@ -43,8 +43,6 @@ def network_request(url, headers={}, post=False, params=None, timeout=None, data
 		time.sleep(PAUSE_BETWEEN_REQUESTS)
 		# Pause to prevent back to back requests
 
-
-
 def gen_all_pages(url, itemCount):
 	urls = []
 	for i in range((itemCount/20)+1):
