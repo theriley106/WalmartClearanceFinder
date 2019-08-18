@@ -59,13 +59,6 @@ def pull_page(sku):
 if __name__ == '__main__':
 	get_info()
 	raw_input("Continue: ")
-	#sku = "719650769"
-	#url = "https://www.walmart.com/ip/{}".format(sku)
-	#res = requests.get(url)
-	#page = bs4.BeautifulSoup(res.text, 'lxml')
-	#for link in page.find_all('a', href=True):
-	#	print link['href']
-	#print "athcpid" in str(page)
 	threads = [threading.Thread(target=get_info) for i in range(THREAD_COUNT)]
 	for thread in threads:
 		thread.start()
