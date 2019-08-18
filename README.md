@@ -1,6 +1,12 @@
 # WolfOfWalmart
 Large scale Walmart inventory analytics
 
+## Installation
+
+``` {.sourceCode .bash}
+$ pip install -r requirements.txt
+```
+
 ## How to use
 
 -v Determines how verbose the output is
@@ -14,8 +20,6 @@ Large scale Walmart inventory analytics
 -i determines the skus to search (leave deafult for all, takes text files and strings as inputs)
 
 -s determines which store to search (Leave default for all)
-
-
 
 
 ## Examples
