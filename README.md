@@ -1,7 +1,7 @@
 # WolfOfWalmart
 Large scale Walmart inventory analytics
 
-## Installation
+## Installing Dependencies
 
 ``` {.sourceCode .bash}
 $ pip install -r requirements.txt
