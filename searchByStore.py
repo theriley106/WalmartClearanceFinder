@@ -1,7 +1,7 @@
+# encoding=utf8
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
-# Set default encoding to UTF-8
 import argparse
 import walmart
 import threading
