@@ -3,7 +3,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 import argparse
-import walmart
+import helper
 import threading
 import csv
 import time
@@ -42,7 +42,7 @@ def search():
 			lock.release()
 			skuNumber = searchVal['sku']
 			storeNumber = searchVal['store']
-			val = walmart.local_item_info(storeNumber, skuNumber)
+			val = helper.local_item_info(storeNumber, skuNumber)
 			#print val
 			#print val.keys()
 			if val != None:
@@ -50,14 +50,14 @@ def search():
 					pass
 				else:
 					val['skuVal'] = skuNumber
-					if walmart.VERBOSE > 1:
+					if helper.VERBOSE > 1:
 						print "{} | {} | {} | {} | {}/{}\n".format(val['title'][:40], val['price'], skuNumber, len(ALL_ITEMS), len(COMPLETED), STATIC_VALS[0]),
 					tVal = []
 					for key in CSV_HEADERS:
 						tVal.append(val[key])
 					ALL_ITEMS.append(tVal)
 		except Exception as exp:
-			if walmart.VERBOSE > 3:
+			if helper.VERBOSE > 3:
 				print("ERROR: {}".format(exp))
 			try:
 				lock.release()
@@ -81,9 +81,9 @@ if __name__ == '__main__':
 	if args['verbose'] != False:
 		# Sets verbose setting
 		try:
-			walmart.VERBOSE = int(args['verbose'])
+			helper.VERBOSE = int(args['verbose'])
 		except:
-			walmart.VERBOSE = 5
+			helper.VERBOSE = 5
 	if '.' not in args['input']:
 		# This means it's a single sku search
 		skuList = [args['input']]
@@ -94,7 +94,7 @@ if __name__ == '__main__':
 		# Creates a list from the file input
 	if args['store'] == None:
 		# This means the user did not specify a store number
-		storeVals = walmart.GrabAllStoreNumbers()
+		storeVals = helper.GrabAllStoreNumbers()
 		# Creates a list of every store
 	else:
 		# The user specified a single store
